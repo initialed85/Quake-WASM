@@ -1,0 +1,15 @@
+**
+
+!WinQuake
+
+WinQuake/*.o
+WinQuake/pr_cmds*.tmp
+WinQuake/index.data
+WinQuake/index.html
+WinQuake/index.js
+WinQuake/index.wasm
+
+!gnu.txt
+
+emsdk
+gl4es

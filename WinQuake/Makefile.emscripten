@@ -1,16 +1,20 @@
 # Quake Makefile for Emscripten / WebAssembly
 # Written by Gregory Maynard-Hoare
 
+ifeq ($(WEBSOCKET_URL),)
+	WEBSOCKET_URL := ws://localhost:8081/ws
+endif
+
 # Compiler / linker parameters
 CC := emcc
 CFLAGS := -O3 -ffast-math -funroll-loops -fomit-frame-pointer -Wall -Wextra -Wno-implicit-function-declaration \
 	-Wno-unused-parameter -Wno-missing-field-initializers -sUSE_SDL=2 -DSDL
 LDFLAGS := -O3 -sUSE_SDL=2 -sINITIAL_MEMORY=64MB -sTOTAL_STACK=2MB -sALLOW_MEMORY_GROWTH --preload-file=id1 \
-	--shell-file shell.html -lidbfs.js
+	--shell-file shell.html -lidbfs.js -sWEBSOCKET_URL=$(WEBSOCKET_URL) -sWEBSOCKET_SUBPROTOCOL=binary -sASYNCIFY
 TARGET := index.html
 
 ifeq ($(GLQUAKE), 1)
-	GL4ES := /home/user/gl4es
+	GL4ES := $(shell dirname $(shell pwd))/gl4es
 endif
 
 # C source files

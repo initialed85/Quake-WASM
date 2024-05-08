@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -54,6 +54,10 @@ unsigned long inet_addr(const char *cp);
 
 #include "quakedef.h"
 #include "net_dgrm.h"
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 // these two macros are to make the code more readable
 #define sfunc	net_landrivers[sock->landriver]
@@ -326,7 +330,7 @@ int	Datagram_GetMessage (qsocket_t *sock)
 			ReSendMessage (sock);
 
 	while(1)
-	{	
+	{
 		length = sfunc.Read (sock->socket, (byte *)&packetBuffer, NET_DATAGRAMSIZE, &readaddr);
 
 //	if ((rand() & 255) > 220)
@@ -890,7 +894,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		int			activeNumber;
 		int			clientNumber;
 		client_t	*client;
-		
+
 		playerNumber = MSG_ReadByte();
 		activeNumber = -1;
 		for (clientNumber = 0, client = svs.clients; clientNumber < svs.maxclients; clientNumber++, client++)
@@ -1067,7 +1071,7 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 		return NULL;
 	}
 
-	// everything is allocated, just fill in the details	
+	// everything is allocated, just fill in the details
 	sock->socket = newsock;
 	sock->landriver = net_landriverlevel;
 	sock->addr = clientaddr;
@@ -1247,6 +1251,9 @@ static qsocket_t *_Datagram_Connect (char *host)
 
 	for (reps = 0; reps < 3; reps++)
 	{
+#ifdef __EMSCRIPTEN__
+		emscripten_sleep(1); // avoid busy wait
+#endif
 		SZ_Clear(&net_message);
 		// save space for the header, filled in later
 		MSG_WriteLong(&net_message, 0);
@@ -1258,6 +1265,9 @@ static qsocket_t *_Datagram_Connect (char *host)
 		SZ_Clear(&net_message);
 		do
 		{
+#ifdef __EMSCRIPTEN__
+			emscripten_sleep(1); // avoid busy wait
+#endif
 			ret = dfunc.Read (newsock, net_message.data, net_message.maxsize, &readaddr);
 			// if we got something, validate it
 			if (ret > 0)

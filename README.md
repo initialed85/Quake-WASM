@@ -1,3 +1,14 @@
+I've forked this repo to add WebSocket multiplayer to the already great work done by [GMH-Code](https://github.com/GMH-Code); you can check out the diff, but
+the main theme of the changes are:
+
+- Add some native and containerized build tooling to ease things like building for OpenGL
+- Tweak some Emscripten build flags to be able to inject WebSocket configuration
+- Tweak `WinQuake/net_dgrm.c` so that it uses `emscripten_sleep` to avoid an otherwise busy wait that hangs up the browser thread during the multiplayer
+  connection attempt
+    - I'm not strictly sure this was necessary, but it can't hurt
+
+**Original README follows...**
+
 Quake-WASM
 ==========
 
@@ -174,43 +185,64 @@ The demo can be played back with `playdemo mydemo-e1m1`.
 Networking Support
 ------------------
 
-You can play in a browser window, but WebSockets support for multiplayer has not yet been added.
+The [built-in Emscripten support for WebSockets](https://emscripten.org/docs/porting/networking.html#emulated-posix-tcp-sockets-over-websockets)
+is enabled by default but you'll need an appropriate WebSocket proxy to connect to, given the peculiar way Quake uses UDP sockets (i.e. both client and
+server bind to a given UDP port and simply invoke `sendto` rather than holding a socket open with `connect`).
 
-It should be possible to connect to a WebSockets proxy to enable online play, but the project will need rebuilding with the appropriate proxy configuration.
+You can find an example of such a WebSocket proxy at [initialed85/quake-wasm-multiplayer](https://github.com/initialed85/quake-wasm-multiplayer).
 
-Building Quake from Source (on Linux)
+Building Quake from Source (on Linux / macOS / Docker)
 -------------------------------------
 
 Before you start:
 
 1. As mentioned earlier, don't bundle or host any files unless you have a licence to do so.
 2. You will need to add files to the `WinQuake/id1` folder (`PAK` or otherwise).  If you don't do this, the engine will have nothing to run.
+    - All filenames included in the `id1` folder should be in lowercase. The Quake engine is case-sensitive on anything other than Windows.
 
-Next, download and extract [Emscripten](https://emscripten.org/), then run these commands to start the build:
+To build natively:
 
-    cd <EMSDK folder>
-    ./emsdk install latest
-    ./emsdk activate latest
-    source ./emsdk_env.sh
-    cd <Quake folder>/WinQuake
-    make -f Makefile.emscripten
+    ./build.sh
 
-This will output `index.html`, `index.js`, `index.wasm`, and `index.data`, which can be placed into an empty directory on a web server.
+Or to build using Docker:
+
+    ./build-docker.sh
+
+This will output `index.html`, `index.js`, `index.wasm`, and `index.data`, in the `WinQuake` folder which can be placed into an empty directory on a web server.
 
 For fastest download time, compress these files with *GZip* or *Brotli* and ensure they are served as-is.
 
-Building GLQuake from Source (on Linux)
+Building GLQuake from Source (on Linux / macOS / Docker)
 ---------------------------------------
 
-This is the same as building Quake, except you should additionally:
+This is the same as building Quake, except you need an extra environment variable.
 
-1. Download *GL4ES* and build it for Emscripten, as per its instructions.
-2. Edit `Makefile.emscripten` to point to *GL4ES*'s `include` and `lib` directories.
-3. Call `make -f Makefile.emscripten GLQUAKE=1` as a substitute for the final step.
+To build natively:
+
+    GLQUAKE=1 ./build.sh
+
+Or to build using Docker:
+
+    GLQUAKE=1 ./build-docker.sh
 
 Quake and GLQuake can co-exist on the same web server and will share settings / saves if on the same domain.
 
-Notes
------
+Building Quake / GLQuake using a particular WebSocket proxy URL
+---------------------------------------
 
-When building *Quake-WASM*, all filenames included in the `id1` folder should be in lowercase.  The Quake engine is case-sensitive on anything other than Windows.
+This is the same as the above two examples, except you need yet another extra environment variable.
+
+To build natively:
+
+    WEBSOCKET_URL=ws://192.168.137.222:8081/ws ./build.sh
+
+Or to build using Docker:
+
+    WEBSOCKET_URL=ws://192.168.137.222:8081/ws ./build-docker.sh
+
+Running Quake / GLQuake using the resultant artifacts from above
+---------------------------------------
+
+This requires `devserver` (which is installed with `cargo`):
+
+    ./run.sh
