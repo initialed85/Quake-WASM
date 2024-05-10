@@ -7,5 +7,7 @@ WinQuake/index.data
 WinQuake/index.html
 WinQuake/index.js
 WinQuake/index.wasm
+WinQuake/index.wasm.map
+WinQuake/id1/vkQuake.cfg
 
 WinQuake/id1/*.pak

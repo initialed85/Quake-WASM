@@ -8,9 +8,10 @@ endif
 # Compiler / linker parameters
 CC := emcc
 CFLAGS := -O3 -ffast-math -funroll-loops -fomit-frame-pointer -Wall -Wextra -Wno-implicit-function-declaration \
-	-Wno-unused-parameter -Wno-missing-field-initializers -sUSE_SDL=2 -DSDL
+	-Wno-unused-parameter -Wno-missing-field-initializers -sUSE_SDL=2 -DSDL -g -DASYNCIFY=1 -DALLOW_BLOCKING_ON_MAIN_THREAD=1
 LDFLAGS := -O3 -sUSE_SDL=2 -sINITIAL_MEMORY=64MB -sTOTAL_STACK=2MB -sALLOW_MEMORY_GROWTH --preload-file=id1 \
-	--shell-file shell.html -lidbfs.js -sWEBSOCKET_URL=$(WEBSOCKET_URL) -sWEBSOCKET_SUBPROTOCOL=binary -sASYNCIFY
+	--shell-file shell.html -lidbfs.js -sWEBSOCKET_URL=$(WEBSOCKET_URL) -sWEBSOCKET_SUBPROTOCOL=binary \
+	-lwebsocket.js -gsource-map -sASYNCIFY=1 -sALLOW_BLOCKING_ON_MAIN_THREAD=1
 TARGET := index.html
 
 ifeq ($(GLQUAKE), 1)
@@ -41,6 +42,7 @@ net_loop.c \
 net_main.c \
 net_udp.c \
 net_vcr.c \
+net_websocket.c \
 pr_cmds.c \
 pr_edict.c \
 pr_exec.c \

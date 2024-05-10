@@ -51,13 +51,12 @@ char *inet_ntoa(struct in_addr in);
 unsigned long inet_addr(const char *cp);
 #endif
 #endif	// BAN_TEST
-
-#include "quakedef.h"
-#include "net_dgrm.h"
-
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
+
+#include "quakedef.h"
+#include "net_dgrm.h"
 
 // these two macros are to make the code more readable
 #define sfunc	net_landrivers[sock->landriver]
@@ -1251,9 +1250,6 @@ static qsocket_t *_Datagram_Connect (char *host)
 
 	for (reps = 0; reps < 3; reps++)
 	{
-#ifdef __EMSCRIPTEN__
-		emscripten_sleep(1); // avoid busy wait
-#endif
 		SZ_Clear(&net_message);
 		// save space for the header, filled in later
 		MSG_WriteLong(&net_message, 0);
@@ -1265,9 +1261,6 @@ static qsocket_t *_Datagram_Connect (char *host)
 		SZ_Clear(&net_message);
 		do
 		{
-#ifdef __EMSCRIPTEN__
-			emscripten_sleep(1); // avoid busy wait
-#endif
 			ret = dfunc.Read (newsock, net_message.data, net_message.maxsize, &readaddr);
 			// if we got something, validate it
 			if (ret > 0)

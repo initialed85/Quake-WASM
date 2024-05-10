@@ -1,7 +1,7 @@
 ARG GLQUAKE
 ARG WEBSOCKET_URL
 
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS builder
 
 ARG GLQUAKE
 ENV GLQUAKE=${GLQUAKE}
@@ -44,5 +44,13 @@ RUN . ./emsdk_env.sh && \
     cd ../WinQuake && \
     make -f Makefile.emscripten
 
-ENTRYPOINT ["tail", "-F", "/dev/null"]
-CMD []
+FROM nginx:stable
+
+COPY ./default.conf /etc/nginx/conf.d/default.conf
+
+WORKDIR /usr/share/nginx/html/
+
+COPY --from=builder /srv/WinQuake/index.html /usr/share/nginx/html/index.html
+COPY --from=builder /srv/WinQuake/index.js /usr/share/nginx/html/index.js
+COPY --from=builder /srv/WinQuake/index.wasm /usr/share/nginx/html/index.wasm
+COPY --from=builder /srv/WinQuake/index.data /usr/share/nginx/html/index.data

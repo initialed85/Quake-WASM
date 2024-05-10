@@ -10,6 +10,7 @@ WinQuake/index.js
 WinQuake/index.wasm
 
 !gnu.txt
+!default.conf
 
 emsdk
 gl4es

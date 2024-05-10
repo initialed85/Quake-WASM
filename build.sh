@@ -43,7 +43,7 @@ fi
 cd WinQuake
 
 # shellcheck disable=SC2068
-WEBSOCKET_URL=${WEBSOCKET_URL:-} GLQUAKE=${GLQUAKE:-} make -f Makefile.emscripten ${@}
+DEBUG=${DEBUG:-} WEBSOCKET_URL=${WEBSOCKET_URL:-} GLQUAKE=${GLQUAKE:-} make -f Makefile.emscripten ${@}
 
 cd ..
 

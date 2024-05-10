@@ -31,4 +31,6 @@ devserver \
     --header 'Cross-Origin-Embedder-Policy: require-corp' \
     --header 'Access-Control-Allow-Origin: *' \
     --header 'Access-Control-Allow-Methods: GET,OPTIONS' \
-    --path ./WinQuake
+    --path ./WinQuake \
+    --address 0.0.0.0:8080 \
+    --noreload

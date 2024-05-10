@@ -15,10 +15,10 @@ docker build --build-arg "WEBSOCKET_URL=${WEBSOCKET_URL:-}" --build-arg "GLQUAKE
 
 docker run --rm -d --name quake-wasm-build "${REPO_NAME}:latest"
 
-docker cp "quake-wasm-build:/srv/WinQuake/index.data" "./WinQuake/index.data"
-docker cp "quake-wasm-build:/srv/WinQuake/index.html" "./WinQuake/index.html"
-docker cp "quake-wasm-build:/srv/WinQuake/index.js" "./WinQuake/index.js"
-docker cp "quake-wasm-build:/srv/WinQuake/index.wasm" "./WinQuake/index.wasm"
+docker cp "quake-wasm-build:/usr/share/nginx/html/index.html" "./WinQuake/index.html"
+docker cp "quake-wasm-build:/usr/share/nginx/html/index.js" "./WinQuake/index.js"
+docker cp "quake-wasm-build:/usr/share/nginx/html/index.wasm" "./WinQuake/index.wasm"
+docker cp "quake-wasm-build:/usr/share/nginx/html/index.data" "./WinQuake/index.data"
 
 echo -e "\nAll done!"
 
