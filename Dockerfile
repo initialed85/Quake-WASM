@@ -3,12 +3,6 @@ ARG WEBSOCKET_URL
 
 FROM ubuntu:22.04 AS builder
 
-ARG GLQUAKE
-ENV GLQUAKE=${GLQUAKE}
-
-ARG WEBSOCKET_URL
-ENV WEBSOCKET_URL=${WEBSOCKET_URL}
-
 RUN apt-get update && apt-get install -y \
     git ca-certificates build-essential cmake \
     python3 python3-pip libgl1-mesa-glx
@@ -27,6 +21,12 @@ WORKDIR /srv/
 RUN git clone https://github.com/ptitSeb/gl4es.git
 
 WORKDIR /srv/emsdk
+
+ARG GLQUAKE
+ENV GLQUAKE=${GLQUAKE}
+
+ARG WEBSOCKET_URL
+ENV WEBSOCKET_URL=${WEBSOCKET_URL}
 
 RUN . ./emsdk_env.sh && \
     cd ../gl4es && \
@@ -47,8 +47,6 @@ RUN . ./emsdk_env.sh && \
 FROM nginx:stable
 
 COPY ./default.conf /etc/nginx/conf.d/default.conf
-
-WORKDIR /usr/share/nginx/html/
 
 COPY --from=builder /srv/WinQuake/index.html /usr/share/nginx/html/index.html
 COPY --from=builder /srv/WinQuake/index.js /usr/share/nginx/html/index.js
