@@ -15,6 +15,12 @@ Added by initialed85
 #include <emscripten/emscripten.h>
 #include <emscripten/websocket.h>
 
+#include "net_websocket.h"
+
+#define MAX_WS_MESSAGES 256 // size of an array using a unsigned char as an index
+#define MAX_WS_MESSAGE_SIZE 65536
+#define WEBSOCKET_URL "ws://localhost:7071/ws"
+
 extern int gethostname(char *, int);
 extern int close(int);
 
@@ -25,9 +31,6 @@ static qboolean ws_opened = false;
 static qboolean ws_onopen_handled = false;
 static qboolean ws_onclose_handled = false;
 static EMSCRIPTEN_WEBSOCKET_T ws;
-
-#define MAX_WS_MESSAGES 256 // size of an array using a unsigned char as an index
-#define MAX_WS_MESSAGE_SIZE 65536
 
 typedef struct
 {
@@ -40,22 +43,23 @@ struct
 	unsigned char read_index;
 	unsigned char write_index;
 	WsMessage messages[MAX_WS_MESSAGES];
-} wsReceivedMessages = {0};
-
-#define WEBSOCKET_URL "ws://localhost:8081/ws"
-
-#include "net_websocket.h"
+} wsMessages = {0};
 
 //=============================================================================
 
 EM_BOOL _WebSocket_onopen(int eventType, const EmscriptenWebSocketOpenEvent *websocketEvent, void *userData)
 {
 	ws_onopen_handled = true;
+
+	Sys_Printf("_WebSocket_onopen: connected\n");
+
 	return EM_TRUE;
 }
 
 EM_BOOL _WebSocket_onerror(int eventType, const EmscriptenWebSocketErrorEvent *websocketEvent, void *userData)
 {
+	Sys_Printf("_WebSocket_onerror: failed (see browser console, hopefully)\n");
+
 	return EM_TRUE;
 }
 
@@ -63,6 +67,16 @@ EM_BOOL _WebSocket_onclose(int eventType, const EmscriptenWebSocketCloseEvent *w
 {
 	if (!ws_onclose_handled)
 		WebSocket_CloseSocket(ws);
+
+	if (ws_opened)
+	{
+		Sys_Printf("_WebSocket_onclose: disconnected unexpectedly\n");
+		Con_Printf("_WebSocket_onclose: disconnected unexpectedly\n");
+	}
+	else
+	{
+		Sys_Printf("_WebSocket_onclose: disconnected at user request\n");
+	}
 
 	ws_onclose_handled = true;
 	return EM_TRUE;
@@ -75,13 +89,24 @@ EM_BOOL _WebSocket_onmessage(int eventType, const EmscriptenWebSocketMessageEven
 		return EM_TRUE;
 	}
 
-	unsigned char write_index = wsReceivedMessages.write_index;
+	int delta = wsMessages.write_index - wsMessages.read_index;
+	if (delta < 0)
+	{
+		delta += MAX_WS_MESSAGES;
+	}
 
-	wsReceivedMessages.messages[write_index].length = (unsigned int)websocketEvent->numBytes;
-	memcpy(wsReceivedMessages.messages[write_index].data, websocketEvent->data, websocketEvent->numBytes);
+	if (wsMessages.write_index + 1 == wsMessages.read_index)
+	{
+		Sys_Printf("_WebSocket_onmessage: wsMessages buffer overflow (r: %d, w: %d, d: %d); disconnecting.\n", wsMessages.read_index, wsMessages.write_index, delta);
+		Con_Printf("_WebSocket_onmessage: wsMessages buffer overflow (r: %d, w: %d, d: %d); disconnecting.\n", wsMessages.read_index, wsMessages.write_index, delta);
+		WebSocket_CloseSocket(ws);
+		return EM_FALSE;
+	}
 
-	write_index++;
-	wsReceivedMessages.write_index = write_index;
+	wsMessages.messages[wsMessages.write_index].length = (unsigned int)websocketEvent->numBytes;
+	memcpy(wsMessages.messages[wsMessages.write_index].data, websocketEvent->data, websocketEvent->numBytes);
+
+	wsMessages.write_index++;
 
 	return EM_TRUE;
 }
@@ -96,10 +121,15 @@ int WebSocket_Init(void)
 	char *colon;
 
 	if (COM_CheckParm("-nowebsocket"))
+	{
+		Sys_Printf("WebSocket_Init: -nowebsocket flag given (disabling WebSockets)\n");
 		return -1;
+	}
 
 	if (!emscripten_websocket_is_supported())
+	{
 		Sys_Error("WebSocket_Init: emscripten_websocket_is_supported() says WebSockets aren't supported\n");
+	}
 
 	// determine my name & address
 	gethostname(buff, MAXHOSTNAMELEN);
@@ -114,7 +144,9 @@ int WebSocket_Init(void)
 	}
 
 	if ((net_controlsocket = WebSocket_OpenSocket(0)) == -1)
+	{
 		Sys_Error("WebSocket_Init: Unable to open control socket\n");
+	}
 
 	WebSocket_GetSocketAddr(net_controlsocket, &addr);
 	Q_strcpy(my_tcpip_address, WebSocket_AddrToString(&addr));
@@ -155,8 +187,21 @@ int WebSocket_OpenSocket(int port)
 	ws_onopen_handled = false;
 	ws_onclose_handled = false;
 
+	for (int i = 0; i < MAX_WS_MESSAGES; i++)
+	{
+		wsMessages.messages[i].length = 0;
+		wsMessages.messages[i].data[0] = '\x00';
+	}
+
+	wsMessages.read_index = 0;
+	wsMessages.write_index = 0;
+
 	if ((ws = emscripten_websocket_new(&ws_attrs)) <= 0)
+	{
+		Sys_Printf("WebSocket_OpenSocket: failed to open socket\n");
+		Con_Printf("WebSocket_OpenSocket: failed to open socket\n");
 		return -1;
+	}
 
 	ws_opened = true;
 
@@ -177,11 +222,11 @@ int WebSocket_CloseSocket(int socket)
 		return 0;
 	}
 
+	ws_opened = false;
+
 	EMSCRIPTEN_RESULT res;
 	char *reason = "Closed by WebSocket_CloseSocket";
 	emscripten_websocket_close(ws, 1000, reason);
-
-	ws_opened = false;
 
 	return 0;
 }
@@ -219,20 +264,20 @@ int WebSocket_Read(int socket, byte *buf, int len, struct qsockaddr *addr)
 		return 0;
 	}
 
-	unsigned char read_index = wsReceivedMessages.read_index;
+	unsigned char read_index = wsMessages.read_index;
 
-	if (wsReceivedMessages.messages[read_index].length <= 0)
+	if (wsMessages.messages[read_index].length <= 0)
 	{
 		return 0;
 	}
 
-	unsigned int length = wsReceivedMessages.messages[read_index].length;
-	memcpy(buf, wsReceivedMessages.messages[read_index].data, length);
+	unsigned int length = wsMessages.messages[read_index].length;
+	memcpy(buf, wsMessages.messages[read_index].data, length);
 
-	wsReceivedMessages.messages[read_index].length = 0;
+	wsMessages.messages[read_index].length = 0;
 
 	read_index++;
-	wsReceivedMessages.read_index = read_index;
+	wsMessages.read_index = read_index;
 
 	return length;
 }

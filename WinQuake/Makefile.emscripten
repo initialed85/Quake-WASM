@@ -2,7 +2,7 @@
 # Written by Gregory Maynard-Hoare
 
 ifeq ($(WEBSOCKET_URL),)
-	WEBSOCKET_URL := ws://localhost:8081/ws
+	WEBSOCKET_URL := ws://localhost:7071/ws
 endif
 
 # Compiler / linker parameters

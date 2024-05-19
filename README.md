@@ -213,18 +213,6 @@ Or to build using Docker:
 
 Quake and GLQuake can co-exist on the same web server and will share settings / saves if on the same domain.
 
-## Building Quake / GLQuake using a particular WebSocket proxy URL
-
-This is the same as the above two examples, except you need yet another extra environment variable.
-
-To build natively:
-
-    WEBSOCKET_URL=ws://192.168.137.222:8081/ws ./build.sh
-
-Or to build using Docker:
-
-    WEBSOCKET_URL=ws://192.168.137.222:8081/ws ./build-docker.sh
-
 ## Running Quake / GLQuake using the resultant artifacts from above
 
 This requires `devserver` (which is installed with `cargo`):
