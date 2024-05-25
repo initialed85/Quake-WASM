@@ -20,6 +20,7 @@ Added by initialed85
 #define MAX_WS_MESSAGES 256 // size of an array using a unsigned char as an index
 #define MAX_WS_MESSAGE_SIZE 65536
 #define WEBSOCKET_URL "ws://localhost:7071/ws"
+#define lowercaseuuid true
 
 extern int gethostname(char *, int);
 extern int close(int);
@@ -31,6 +32,7 @@ static qboolean ws_opened = false;
 static qboolean ws_onopen_handled = false;
 static qboolean ws_onclose_handled = false;
 static EMSCRIPTEN_WEBSOCKET_T ws;
+static char *uuid;
 
 typedef struct
 {
@@ -47,11 +49,62 @@ struct
 
 //=============================================================================
 
+// credit to https://stackoverflow.com/a/71826534/7884214
+char *gen_uuid()
+{
+	char v[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+	// 3fb17ebc-bc38-4939-bc8b-74f2443281d4
+	// 8 dash 4 dash 4 dash 4 dash 12
+	static char buf[37] = {0};
+
+	// gen random for all spaces because lazy
+	for (int i = 0; i < 36; ++i)
+	{
+		buf[i] = v[rand() % 16];
+	}
+
+	// put dashes in place
+	buf[8] = '-';
+	buf[13] = '-';
+	buf[18] = '-';
+	buf[23] = '-';
+
+	// needs end byte
+	buf[36] = '\0';
+
+	return buf;
+}
+
+//=============================================================================
+
 EM_BOOL _WebSocket_onopen(int eventType, const EmscriptenWebSocketOpenEvent *websocketEvent, void *userData)
 {
 	ws_onopen_handled = true;
 
 	Sys_Printf("_WebSocket_onopen: connected\n");
+
+	char buf[MAX_WS_MESSAGE_SIZE];
+
+	buf[0] = 62;
+	buf[1] = 91;
+	buf[2] = 27;
+	buf[3] = 3;
+	buf[4] = 20;
+	buf[5] = 0;
+
+	int offset = 6;
+
+	int i;
+	for (i = offset; i < MAX_WS_MESSAGE_SIZE; i++)
+	{
+		buf[i] = uuid[i - offset];
+		if (buf[i] == '\x00')
+			break;
+	}
+
+	struct qsockaddr addr;
+
+	WebSocket_Write(ws, (byte *) &buf, i, &addr);
 
 	return EM_TRUE;
 }
@@ -154,7 +207,11 @@ int WebSocket_Init(void)
 	if (colon)
 		*colon = 0;
 
-	Con_Printf("WebSocket Initialized\n");
+	srand(time(NULL));
+	uuid = malloc(37);
+	uuid = gen_uuid();
+
+	Con_Printf("WebSocket Initialized; uuid: %s\n", uuid);
 	tcpipAvailable = true;
 
 	return net_controlsocket;
@@ -178,6 +235,10 @@ void WebSocket_Listen(qboolean state)
 
 int WebSocket_OpenSocket(int port)
 {
+	if (ws_opened) {
+		return 0;
+	}
+
 	EmscriptenWebSocketCreateAttributes ws_attrs = {
 		WEBSOCKET_URL,
 		NULL,
@@ -224,7 +285,6 @@ int WebSocket_CloseSocket(int socket)
 
 	ws_opened = false;
 
-	EMSCRIPTEN_RESULT res;
 	char *reason = "Closed by WebSocket_CloseSocket";
 	emscripten_websocket_close(ws, 1000, reason);
 
@@ -325,10 +385,7 @@ int WebSocket_Write(int socket, byte *buf, int len, struct qsockaddr *addr)
 char *WebSocket_AddrToString(struct qsockaddr *addr)
 {
 	static char buffer[22];
-	int haddr;
-
-	haddr = ntohl(((struct sockaddr_in *)addr)->sin_addr.s_addr);
-	sprintf(buffer, "%d.%d.%d.%d:%d");
+	sprintf(buffer, "%s", "6.9.42.0:13337");
 	return buffer;
 }
 
@@ -361,7 +418,7 @@ int WebSocket_GetSocketAddr(int socket, struct qsockaddr *addr)
 
 int WebSocket_GetNameFromAddr(struct qsockaddr *addr, char *name)
 {
-	name = "quake-wasm\x00";
+	sprintf(name, "%s", "quake-wasm\x00");
 	return 0;
 }
 
