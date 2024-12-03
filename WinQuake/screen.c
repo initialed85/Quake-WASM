@@ -617,7 +617,7 @@ SCR_ScreenShot_f
 void SCR_ScreenShot_f (void) 
 { 
 #ifdef __EMSCRIPTEN__
-	Con_Printf("PCX screenshots are disabled in Quake-WASM.\n");
+	Con_Printf("PCX screenshots are disabled in Qwasm.\n");
 #else
 	int     i; 
 	char		pcxname[80]; 

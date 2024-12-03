@@ -412,7 +412,7 @@ void Draw_Init (void)
 #if defined(__linux__)
 	sprintf (ver, "(Linux %2.2f, gl %4.2f) %4.2f", (float)LINUX_VERSION, (float)GLQUAKE_VERSION, (float)VERSION);
 #elif defined(__EMSCRIPTEN__)
-	sprintf (ver, "(WASM GLQuake) %4.2f", (float)VERSION);
+	sprintf (ver, "(Qwasm GL) %4.2f", (float)VERSION);
 #else
 	sprintf (ver, "(gl %4.2f) %4.2f", (float)GLQUAKE_VERSION, (float)VERSION);
 #endif

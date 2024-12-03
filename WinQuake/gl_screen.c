@@ -591,7 +591,7 @@ SCR_ScreenShot_f
 void SCR_ScreenShot_f (void) 
 {
 #ifdef __EMSCRIPTEN__
-	Con_Printf("Targa screenshots are disabled in Quake-WASM.\n");
+	Con_Printf("Targa screenshots are disabled in Qwasm.\n");
 #else
 	byte		*buffer;
 	char		pcxname[80]; 

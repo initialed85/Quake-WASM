@@ -1,4 +1,4 @@
-# Quake Makefile for Emscripten / WebAssembly
+# Qwasm Makefile for Emscripten / WebAssembly
 # Written by Gregory Maynard-Hoare
 
 # Compiler / linker parameters

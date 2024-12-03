@@ -405,8 +405,8 @@ void wasm_init_fs(void)
 		FS.mkdir("/id1");
 		FS.mount(IDBFS, {}, "/id1");
 #endif
-		FS.mkdir("/quake-wasm");
-		FS.mount(IDBFS, {}, "/quake-wasm");
+		FS.mkdir("/qwasm");
+		FS.mount(IDBFS, {}, "/qwasm");
 		console.info("Loading data...");
 		FS.syncfs(true, function (err) {
 			if (err)

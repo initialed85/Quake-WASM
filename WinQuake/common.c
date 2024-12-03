@@ -1819,7 +1819,7 @@ void COM_InitFilesystem (void)
 	{
 		strncpy(relative_dir, com_gamedir + 1, sizeof(relative_dir));
 		relative_dir[sizeof(relative_dir) - 1] = '\0';
-		snprintf(save_dir, sizeof(save_dir), "/quake-wasm%s", relative_dir);
+		snprintf(save_dir, sizeof(save_dir), "/qwasm%s", relative_dir);
 		Sys_mkdir(save_dir);
 		COM_AddGameDirectory(va(save_dir));
 	}
