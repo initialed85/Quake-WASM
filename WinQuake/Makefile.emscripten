@@ -9,10 +9,6 @@ LDFLAGS := -O3 -sUSE_SDL=2 -sINITIAL_MEMORY=64MB -sTOTAL_STACK=2MB -sALLOW_MEMOR
 	--shell-file shell.html -lidbfs.js
 TARGET := index.html
 
-ifeq ($(GLQUAKE), 1)
-	GL4ES := /home/user/gl4es
-endif
-
 # C source files
 SRCS := \
 chase.c \
@@ -54,7 +50,7 @@ wad.c \
 world.c \
 zone.c
 
-ifeq ($(GLQUAKE), 1)
+ifdef GL4ES_PATH
 	SRCS += \
 	gl_draw.c \
 	gl_mesh.c \
@@ -68,8 +64,8 @@ ifeq ($(GLQUAKE), 1)
 	gl_test.c \
 	gl_warp.c
 
-	CFLAGS += -DGLQUAKE -I$(GL4ES)/include
-	LDFLAGS += $(GL4ES)/lib/libGL.a -sFULL_ES2=1
+	CFLAGS += -DGLQUAKE -I$(GL4ES_PATH)/include
+	LDFLAGS += $(GL4ES_PATH)/lib/libGL.a -sFULL_ES2=1
 else
 	SRCS += \
 	d_edge.c \

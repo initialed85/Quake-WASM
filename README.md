@@ -215,11 +215,10 @@ For fastest download time, compress these files with *GZip* or *Brotli* and ensu
 Building Hardware-Rendered Qwasm (on Linux)
 -------------------------------------------
 
-The WebGL version can be built in the same way as the software-rendered version, except you should additionally:
+The WebGL version can be built in the same way as the software-rendered version, except you should:
 
 1. Download *GL4ES* and build it for Emscripten, as per its instructions.
-2. Edit `Makefile.emscripten` to point to *GL4ES*'s `include` and `lib` directories.
-3. Call `make -f Makefile.emscripten GLQUAKE=1` as a substitute for the final step.
+2. Call `make -f Makefile.emscripten GL4ES_PATH=/tmp/gl4es` as a substitute for the final step, adjusting the GL4ES path as appropriate.  Everything else required for the WebGL build should be selected automatically.
 
 Both software and hardware versions can co-exist on the same web server and will share settings / saves if on the same domain.
 
