@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -201,8 +201,8 @@ void	VID_UnlockBuffer (void);
 
 //===========================================
 
-#define	MAX_SCOREBOARD		16
-#define	MAX_SCOREBOARDNAME	32
+#define	MAX_SCOREBOARD		64
+#define	MAX_SCOREBOARDNAME	128
 
 #define	SOUND_CHANNELS		8
 

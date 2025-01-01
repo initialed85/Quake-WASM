@@ -12,7 +12,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -38,11 +38,11 @@ unsigned short  d_8to16table[256];
 //#define    BASEHEIGHT   200
 // Much better for high resolution displays
 #ifdef GLQUAKE
-#define    BASEWIDTH    1024
-#define    BASEHEIGHT   768
+#define    BASEWIDTH    1680
+#define    BASEHEIGHT   1050
 #else
 #define    BASEWIDTH    800
-#define    BASEHEIGHT   600
+#define    BASEHEIGHT   525
 #endif
 
 int    VGA_width, VGA_height, VGA_rowbytes, VGA_bufferrowbytes = 0;
@@ -406,7 +406,7 @@ void    VID_Init (unsigned char *palette)
     if (d_pzbuffer == NULL)
         Sys_Error("VID: Not enough memory for video mode\n");
 
-    // initialize the cache memory 
+    // initialize the cache memory
     cache = (byte *) d_pzbuffer
             + vid.width * vid.height * sizeof (*d_pzbuffer);
     D_InitCaches (cache, cachesize);
@@ -582,7 +582,7 @@ void Sys_SendKeyEvents(void)
                    case SDLK_RALT:
                    case SDLK_LALT: sym = K_ALT; break;
                    case SDLK_KP_0:
-                       if(modstate & KMOD_NUM) sym = K_INS; 
+                       if(modstate & KMOD_NUM) sym = K_INS;
                        else sym = SDLK_0;
                        break;
                    case SDLK_KP_1:
@@ -678,7 +678,7 @@ void Sys_SendKeyEvents(void)
 
             case SDL_QUIT:
                 CL_Disconnect ();
-                Host_ShutdownServer(false);        
+                Host_ShutdownServer(false);
                 Sys_Quit ();
                 break;
             default:
@@ -704,9 +704,9 @@ void IN_Commands (void)
 {
     int i;
     int mouse_buttonstate;
-   
+
     if (!mouse_avail) return;
-   
+
     i = SDL_GetMouseState(NULL, NULL);
     /* Quake swaps the second and third buttons */
     mouse_buttonstate = (i & ~0x06) | ((i & 0x02)<<1) | ((i & 0x04)>>1);
@@ -724,17 +724,17 @@ void IN_Move (usercmd_t *cmd)
 {
     if (!mouse_avail)
         return;
-   
+
     mouse_x *= sensitivity.value;
     mouse_y *= sensitivity.value;
-   
+
     if ( (in_strafe.state & 1) || (lookstrafe.value && (in_mlook.state & 1) ))
         cmd->sidemove += m_side.value * mouse_x;
     else
         cl.viewangles[YAW] -= m_yaw.value * mouse_x;
     if (in_mlook.state & 1)
         V_StopPitchDrift ();
-   
+
     if ( (in_mlook.state & 1) && !(in_strafe.state & 1)) {
         cl.viewangles[PITCH] += m_pitch.value * mouse_y;
         if (cl.viewangles[PITCH] > 80)

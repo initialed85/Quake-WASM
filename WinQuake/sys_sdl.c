@@ -56,12 +56,12 @@ void Sys_Printf (char *fmt, ...)
 {
 	va_list		argptr;
 	char		text[1024];
-	
+
 	va_start (argptr,fmt);
 	vsprintf (text,fmt,argptr);
 	va_end (argptr);
 	fprintf(stdout, "%s", text);
-	
+
 	//Con_Print (text);
 }
 
@@ -105,7 +105,7 @@ void Sys_HighFPPrecision (void)
 
 
 void Sys_Error (char *error, ...)
-{ 
+{
     va_list     argptr;
     char        string[1024];
 
@@ -117,18 +117,18 @@ void Sys_Error (char *error, ...)
 	Host_Shutdown ();
 	exit (1);
 
-} 
+}
 
 void Sys_Warn (char *warning, ...)
-{ 
+{
     va_list     argptr;
     char        string[1024];
-    
+
     va_start (argptr,warning);
     vsprintf (string,warning,argptr);
     va_end (argptr);
 	fprintf(stdout, "Warning: %s", string);
-} 
+}
 
 /*
 ===============================================================================
@@ -144,7 +144,7 @@ FILE	*sys_handles[MAX_HANDLES];
 int		findhandle (void)
 {
 	int		i;
-	
+
 	for (i=1 ; i<MAX_HANDLES ; i++)
 		if (!sys_handles[i])
 			return i;
@@ -174,7 +174,7 @@ int Sys_FileOpenRead (char *path, int *hndl)
 {
 	FILE	*f;
 	int		i;
-	
+
 	i = findhandle ();
 
 	f = fopen(path, "rb");
@@ -185,7 +185,7 @@ int Sys_FileOpenRead (char *path, int *hndl)
 	}
 	sys_handles[i] = f;
 	*hndl = i;
-	
+
 	return Qfilelength(f);
 }
 
@@ -193,14 +193,14 @@ int Sys_FileOpenWrite (char *path)
 {
 	FILE	*f;
 	int		i;
-	
+
 	i = findhandle ();
 
 	f = fopen(path, "wb");
 	if (!f)
 		Sys_Error ("Error opening %s: %s", path,strerror(errno));
 	sys_handles[i] = f;
-	
+
 	return i;
 }
 
@@ -238,7 +238,7 @@ int Sys_FileRead (int handle, void *dst, int count)
 		}
 	}
 	return size;
-		
+
 }
 
 int Sys_FileWrite (int handle, void *src, int count)
@@ -265,14 +265,14 @@ int Sys_FileWrite (int handle, void *src, int count)
 int	Sys_FileTime (char *path)
 {
 	FILE	*f;
-	
+
 	f = fopen(path, "rb");
 	if (f)
 	{
 		fclose(f);
 		return 1;
 	}
-	
+
 	return -1;
 }
 
@@ -287,10 +287,10 @@ void Sys_mkdir (char *path)
 
 void Sys_DebugLog(char *file, char *fmt, ...)
 {
-    va_list argptr; 
+    va_list argptr;
     static char data[1024];
     FILE *fp;
-    
+
     va_start(argptr, fmt);
     vsprintf(data, fmt, argptr);
     va_end(argptr);
@@ -313,10 +313,10 @@ double Sys_FloatTime (void)
 #else
 
     struct timeval tp;
-    struct timezone tzp; 
-    static int      secbase; 
-    
-    gettimeofday(&tp, &tzp);  
+    struct timezone tzp;
+    static int      secbase;
+
+    gettimeofday(&tp, &tzp);
 
     if (!secbase)
     {
@@ -482,6 +482,8 @@ int main (int c, char **v)
     Con_Printf("libsdl.org\n\n");
     Con_Printf("SDL2 & WASM conversion by\n");
     Con_Printf("Gregory Maynard-Hoare\n\n");
+    Con_Printf("WebSocket multiplayer by\n");
+    Con_Printf("initialed85\n\n");
 
     if (com_argc > 1)
     {
@@ -580,4 +582,3 @@ void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
     		Sys_Error("Protection change failed\n");
 
 }
-
